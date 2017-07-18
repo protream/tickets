@@ -13,6 +13,7 @@ Options:
 """
 import requests
 import stations
+from datetime import datetime
 from docopt import docopt
 from prettytable import PrettyTable
 from colorama import Fore
@@ -81,7 +82,7 @@ class TrainCollection(object):
         print(pt)
 
 
-class CLI(object):
+class Cli(object):
 
     url_template = (
         'https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.'
@@ -96,11 +97,23 @@ class CLI(object):
         self.from_station = stations.get_telecode(self.arguments['<from>'])
         self.to_station = stations.get_telecode(self.arguments['<to>'])
         self.date = self.arguments['<date>']
+        self.check_arguments_validatity()
         self.options = ''.join([key for key, value in self.arguments.items() if value is True])
 
     @property
     def request_url(self):
         return self.url_template.format(self.date, self.from_station, self.to_station)
+
+    def check_arguments_validatity(self):
+        if self.from_station is None or self.to_station is None:
+            print(u'请输入有效的车站名称')
+            exit()
+        try:
+            if datetime.strptime(self.date, '%Y-%m-%d')< datetime.now():
+                raise ValueError
+        except:
+            print(u'请输入有效日期')
+            exit()
 
     def run(self):
         r = requests.get(self.request_url, verify=False)
@@ -109,4 +122,4 @@ class CLI(object):
 
 
 if __name__ == '__main__':
-    CLI().run()
+    Cli().run()
