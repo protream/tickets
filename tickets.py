@@ -61,13 +61,16 @@ class TrainCollection(object):
             'no_seat': data_list[33] or '--'
         }
 
+    def need_print(self, data_list):
+        station_train_code = data_list[3]
+        initial = station_train_code[0].lower()
+        return (not self.options or initial in self.options)
+
     @property
     def trains(self):
         for train in self.raw_trains:
             data_list = train.split('|')
-            station_train_code = data_list[3]
-            initial = station_train_code[0].lower()
-            if not self.options or initial in self.options:
+            if self.need_print(data_list):
                 yield self.parse_train_data(data_list).values()
 
     def pretty_print(self):
@@ -78,23 +81,32 @@ class TrainCollection(object):
         print(pt)
 
 
-def cli():
-    arguments = docopt(__doc__, version='Tickets 1.0')
-    from_station = stations.get_telecode(arguments['<from>'])
-    to_station = stations.get_telecode(arguments['<to>'])
-    date = arguments['<date>']
-    options = ''.join([key for key, value in arguments.items() if value is True])
-    url = (
+class CLI(object):
+
+    url_template = (
         'https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.'
         'train_date={}&'
         'leftTicketDTO.from_station={}&'
         'leftTicketDTO.to_station={}'
         '&purpose_codes=ADULT'
-    ).format(date, from_station, to_station)
-    r = requests.get(url, verify=False)
-    trains = r.json()['data']['result']
-    TrainCollection(trains, options).pretty_print()
+    )
+
+    def __init__(self):
+        self.arguments = docopt(__doc__, version='Tickets 1.0')
+        self.from_station = stations.get_telecode(self.arguments['<from>'])
+        self.to_station = stations.get_telecode(self.arguments['<to>'])
+        self.date = self.arguments['<date>']
+        self.options = ''.join([key for key, value in self.arguments.items() if value is True])
+
+    @property
+    def request_url(self):
+        return self.url_template.format(self.date, self.from_station, self.to_station)
+
+    def run(self):
+        r = requests.get(self.request_url, verify=False)
+        trains = r.json()['data']['result']
+        TrainCollection(trains, self.options).pretty_print()
 
 
 if __name__ == '__main__':
-    cli()
+    CLI().run()
