@@ -88,8 +88,8 @@ class Cli(object):
         'https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.'
         'train_date={}&'
         'leftTicketDTO.from_station={}&'
-        'leftTicketDTO.to_station={}'
-        '&purpose_codes=ADULT'
+        'leftTicketDTO.to_station={}&'
+        'purpose_codes=ADULT'
     )
 
     def __init__(self):
@@ -97,19 +97,19 @@ class Cli(object):
         self.from_station = stations.get_telecode(self.arguments['<from>'])
         self.to_station = stations.get_telecode(self.arguments['<to>'])
         self.date = self.arguments['<date>']
-        self.check_arguments_validatity()
+        self.check_arguments_validity()
         self.options = ''.join([key for key, value in self.arguments.items() if value is True])
 
     @property
     def request_url(self):
         return self.url_template.format(self.date, self.from_station, self.to_station)
 
-    def check_arguments_validatity(self):
+    def check_arguments_validity(self):
         if self.from_station is None or self.to_station is None:
             print(u'请输入有效的车站名称')
             exit()
         try:
-            if datetime.strptime(self.date, '%Y-%m-%d')< datetime.now():
+            if datetime.strptime(self.date, '%Y-%m-%d') < datetime.now():
                 raise ValueError
         except:
             print(u'请输入有效日期')
