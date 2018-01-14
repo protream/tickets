@@ -16,7 +16,7 @@ import stations
 from datetime import datetime
 from docopt import docopt
 from prettytable import PrettyTable
-from colorama import Fore
+from colorama import Fore, init
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -85,7 +85,7 @@ class TrainCollection(object):
 class Cli(object):
 
     url_template = (
-        'https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.'
+        'https://kyfw.12306.cn/otn/leftTicket/queryZ?leftTicketDTO.'
         'train_date={}&'
         'leftTicketDTO.from_station={}&'
         'leftTicketDTO.to_station={}&'
@@ -122,4 +122,5 @@ class Cli(object):
 
 
 if __name__ == '__main__':
+    init()
     Cli().run()
