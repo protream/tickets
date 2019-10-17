@@ -2,4 +2,6 @@ github命令测试
 tickets
 pull
 A分支内容
-this is master
+
+合并分支冲突测试
+
